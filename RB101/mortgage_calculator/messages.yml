@@ -1,3 +1,4 @@
+welcome: "Welcome to mortgage calculator, you can use this tool to calculate your monthly payments."
 ask_loan_amount: "What is the loan amount? Format should be the following: $500,000"
 invalid_amount: "Not a valid format, please try again using the following format: $500,000"
 ask_interest: "Enter APR in the following format: 5.00%"
