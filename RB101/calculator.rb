@@ -4,11 +4,11 @@
 # display the result of the operation
 
 def prompt(message)
-  Kernel.puts("=> #{message}")
+  puts("=> #{message}")
 end
 
 def valid_number?(num)
-  num.to_i != 0
+  num.to_i.to_s == num
 end
 
 def operation_to_message(op)
@@ -28,15 +28,14 @@ prompt("Welcome to the calculator! Enter your name")
 
 name = ''
 loop do
-  name = Kernel.gets().chomp()
+  name = gets.chomp
 
-  if name.empty?()
+  if name.empty?
     prompt("make sure to use a valid name")
   else
     break
   end
 end
-
 
 loop do
   number1 = ''
@@ -44,7 +43,7 @@ loop do
 
   loop do
     prompt("What's the first number?")
-    number1 = Kernel.gets().chomp()
+    number1 = gets.chomp
 
     if valid_number?(number1)
       break
@@ -55,7 +54,7 @@ loop do
 
   loop do
     prompt("What's the second number?")
-    number2 = Kernel.gets().chomp()
+    number2 = gets.chomp
 
     if valid_number?(number2)
       break
@@ -100,6 +99,6 @@ loop do
   prompt("the result is #{result}")
   prompt("Do you want to perform another calculation? (Y/N)")
 
-  answer = Kernel.gets().chomp()
-  break unless answer.downcase().start_with?('y')
+  answer = gets.chomp
+  break unless answer.downcase.start_with?('y')
 end
