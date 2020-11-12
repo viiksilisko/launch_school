@@ -1,45 +1,42 @@
 VALID_CHOICES = %w(rock paper scissors spock lizard)
+
 def prompt(message)
   puts("=> #{message}")
 end
 
+WINNING_SETS = {
+  'rock': ['scissors', 'lizard'],
+  'paper': ['rock', 'spock'],
+  'scissors': ['paper', 'lizard'],
+  'lizard': ['spock', 'paper'],
+  'spock': ['scissors', 'rock']
+}
+
 def win?(first, second)
-  rock_win?(first, second) ||
-    paper_win?(first, second) ||
-    scissors_win?(first, second) ||
-    lizard_win?(first, second) ||
-    spock_win?(first, second)
+  WINNING_SETS[first.to_sym].include?(second)
 end
 
-def rock_win?(first, second)
-  first == 'rock' && (second == 'scissors' || second == 'lizard')
-end
-
-def paper_win?(first, second)
-  first == 'paper' && (second == 'rock' || second == 'spock')
-end
-
-def scissors_win?(first, second)
-  first == 'scissors' && (second == 'paper' || second == 'lizard')
-end
-
-def lizard_win?(first, second)
-  first == 'lizard' && (second == 'spock' || second == 'paper')
-end
-
-def spock_win?(first, second)
-  first == 'spock' && (second == 'scissors' || second == 'rock')
-end
-
-def display_results(user, computer)
-  if user == computer
-    prompt("It's a tie!")
-  elsif win?(user, computer)
+def display_results(winner, computer_score, user_score)
+  case winner
+  when 'computer'
+    prompt("The computer won!")
+  when 'user'
     prompt("You won!")
   else
-    prompt("The computer won!")
+    prompt("It's a tie!")
+  end
+
+  prompt("The score is: User: #{user_score}, Computer: #{computer_score}")
+
+  if user_score == 5
+    prompt("User is the grandmaster and wins the match!")
+  elsif computer_score == 5
+    prompt("Computer is the grandmaster and wins the match!")
   end
 end
+
+computer_score = 0
+user_score = 0
 
 loop do
   system('clear')
@@ -57,11 +54,27 @@ loop do
 
   computer_choice = VALID_CHOICES.sample
 
-  puts("You chose: #{choice}, the Computer chose: #{computer_choice}")
+  if win?(computer_choice, choice)
+    computer_score += 1
+    round_winner = 'computer'
+  elsif win?(choice, computer_choice)
+    user_score += 1
+    round_winner = 'user'
+  end
 
-  display_results(choice, computer_choice)
+  prompt("You chose: #{choice}, the Computer chose: #{computer_choice}")
+
+  display_results(round_winner, computer_score, user_score)
 
   prompt("Do you want to play again?")
   answer = gets.chomp.downcase
-  break unless answer.start_with?('y')
+
+  if answer.start_with?('y')
+    if computer_score == 5 || user_score == 5
+      computer_score = 0
+      user_score = 0
+    end
+  else
+    break
+  end
 end
