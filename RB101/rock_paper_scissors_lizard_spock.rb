@@ -85,7 +85,7 @@ loop do
 
   display_results(round_winner, computer_score, user_score)
 
-  prompt("Do you want to play again? (y)es to continue, any other input to quit")
+  prompt("Do you want to play again? (y)es to continue, any other key to quit")
   answer = gets.chomp.downcase
 
   if answer == 'y' || answer == 'yes'
