@@ -1,19 +1,27 @@
 VALID_CHOICES = %w(rock paper scissors spock lizard)
 
+RULES = {
+  rock: ['scissors', 'lizard'],
+  paper: ['rock', 'spock'],
+  scissors: ['paper', 'lizard'],
+  lizard: ['spock', 'paper'],
+  spock: ['scissors', 'rock']
+}
+
+VALID_SHORTHAND_INPUTS = {
+  sp: 'spock',
+  r: 'rock',
+  p: 'paper',
+  sc: 'scissors',
+  l: 'lizard'
+}
+
 def prompt(message)
   puts("=> #{message}")
 end
 
-WINNING_SETS = {
-  'rock': ['scissors', 'lizard'],
-  'paper': ['rock', 'spock'],
-  'scissors': ['paper', 'lizard'],
-  'lizard': ['spock', 'paper'],
-  'spock': ['scissors', 'rock']
-}
-
 def win?(first, second)
-  WINNING_SETS[first.to_sym].include?(second)
+  RULES[first.to_sym].include?(second)
 end
 
 def display_results(winner, computer_score, user_score)
@@ -35,6 +43,14 @@ def display_results(winner, computer_score, user_score)
   end
 end
 
+def user_choice(input)
+  if VALID_CHOICES.include?(input)
+    input
+  elsif VALID_SHORTHAND_INPUTS.include?(input.to_sym)
+    VALID_SHORTHAND_INPUTS[input.to_sym]
+  end
+end
+
 computer_score = 0
 user_score = 0
 
@@ -45,7 +61,8 @@ loop do
     prompt("Choose one: #{VALID_CHOICES.join(', ')}")
     choice = gets.chomp
 
-    if VALID_CHOICES.include?(choice)
+    if user_choice(choice)
+      choice = user_choice(choice)
       break
     else
       prompt("That's not a valid choice")
@@ -66,10 +83,10 @@ loop do
 
   display_results(round_winner, computer_score, user_score)
 
-  prompt("Do you want to play again?")
+  prompt("Do you want to play again? (y)es to continue, any other input to quit")
   answer = gets.chomp.downcase
 
-  if answer.start_with?('y')
+  if answer == 'y' || answer == 'yes'
     if computer_score == 5 || user_score == 5
       computer_score = 0
       user_score = 0
