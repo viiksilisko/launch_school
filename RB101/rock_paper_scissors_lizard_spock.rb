@@ -1,5 +1,7 @@
 VALID_CHOICES = %w(rock paper scissors spock lizard)
 
+VALID_INPUT_CHOICES = ['(r)ock', '(p)aper', '(sc)issors', '(sp)ock', '(l)izard']
+
 RULES = {
   rock: ['scissors', 'lizard'],
   paper: ['rock', 'spock'],
@@ -58,7 +60,7 @@ loop do
   system('clear')
   choice = ''
   loop do
-    prompt("Choose one: #{VALID_CHOICES.join(', ')}")
+    prompt("Choose one: #{VALID_INPUT_CHOICES.join(', ')}")
     choice = gets.chomp
 
     if user_choice(choice)
