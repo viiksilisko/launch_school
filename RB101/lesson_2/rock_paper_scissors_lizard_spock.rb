@@ -1,29 +1,34 @@
-VALID_CHOICES = %w(rock paper scissors spock lizard)
-
 VALID_INPUT_CHOICES = ['(r)ock', '(p)aper', '(sc)issors', '(sp)ock', '(l)izard']
 
-RULES = {
-  rock: ['scissors', 'lizard'],
-  paper: ['rock', 'spock'],
-  scissors: ['paper', 'lizard'],
-  lizard: ['spock', 'paper'],
-  spock: ['scissors', 'rock']
-}
-
-VALID_SHORTHAND_INPUTS = {
-  sp: 'spock',
-  r: 'rock',
-  p: 'paper',
-  sc: 'scissors',
-  l: 'lizard'
+GAME_LOGIC = {
+  rock: {
+    loses: ['scissors', 'lizard'],
+    inputs: ['r', 'rock']
+  },
+  paper: {
+    loses: ['rock', 'spock'],
+    inputs: ['p', 'paper']
+  },
+  scissors: {
+    loses: ['paper', 'lizard'],
+    inputs: ['sc', 'scissors']
+  },
+  lizard: {
+    loses: ['spock', 'paper'],
+    inputs: ['l', 'lizard']
+  },
+  spock: {
+    loses: ['scissors', 'rock'],
+    inputs: ['sp', 'spock']
+  }
 }
 
 def prompt(message)
   puts("=> #{message}")
 end
 
-def win?(first, second)
-  RULES[first.to_sym].include?(second)
+def determine_winner(computer, user)
+  GAME_LOGIC[computer.to_sym][:loses].include?(user) ? 'user' : 'computer'
 end
 
 def display_results(winner, computer_score, user_score)
@@ -46,11 +51,8 @@ def display_results(winner, computer_score, user_score)
 end
 
 def user_choice(input)
-  if VALID_CHOICES.include?(input)
-    input
-  elsif VALID_SHORTHAND_INPUTS.include?(input.to_sym)
-    VALID_SHORTHAND_INPUTS[input.to_sym]
-  end
+  choice = GAME_LOGIC.select { |_, v| v[:inputs].include?(input) }
+  choice.any? ? choice.keys : nil
 end
 
 computer_score = 0
@@ -61,25 +63,15 @@ loop do
   choice = ''
   loop do
     prompt("Choose one: #{VALID_INPUT_CHOICES.join(', ')}")
-    choice = gets.chomp
-
-    if user_choice(choice)
-      choice = user_choice(choice)
-      break
-    else
-      prompt("That's not a valid choice")
-    end
+    choice = user_choice(gets.chomp)
+    break if choice
+    prompt("That's not a valid choice")
   end
 
-  computer_choice = VALID_CHOICES.sample
+  computer_choice = GAME_LOGIC.keys.sample
 
-  if win?(computer_choice, choice)
-    computer_score += 1
-    round_winner = 'computer'
-  elsif win?(choice, computer_choice)
-    user_score += 1
-    round_winner = 'user'
-  end
+  round_winner = determine_winner(computer_choice, choice)
+  round_winner == 'computer' ? computer_score += 1 : user_score += 1
 
   prompt("You chose: #{choice}, the Computer chose: #{computer_choice}")
 
