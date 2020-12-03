@@ -20,76 +20,103 @@
       or go over 21.
     - The player with the highest value that's not over 21 wins.
 =end
-require 'pry'
+DECK = [['H', 'A'], ['H', '2'], ['H', '3'], ['H', '4'], ['H', '5'], ['H', '6'],
+        ['H', '7'], ['H', '8'], ['H', '9'], ['H', '10'], ['H', 'J'], ['H', 'Q'],
+        ['H', 'K'], ['S', 'A'], ['S', '2'], ['S', '3'], ['S', '4'], ['S', '5'],
+        ['S', '6'], ['S', '7'], ['S', '8'], ['S', '9'], ['S', '10'], ['S', 'J'],
+        ['S', 'Q'], ['S', 'K'], ['C', 'A'], ['C', '2'], ['C', '3'], ['C', '4'],
+        ['C', '5'], ['C', '6'], ['C', '7'], ['C', '8'], ['C', '9'], ['C', '10'],
+        ['C', 'J'], ['C', 'Q'], ['C', 'K'], ['D', 'A'], ['D', '2'], ['D', '3'],
+        ['D', '4'], ['D', '5'], ['D', '6'], ['D', '7'], ['D', '8'], ['D', '9'],
+        ['D', '10'], ['D', 'J'], ['D', 'Q'], ['D', 'K']]
+def total(cards)
+  # cards = [['H', '3'], ['S', 'Q'], ... ]
+  values = cards.map { |card| card[1] }
 
-DECK = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-        12, 13, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-        10, 11, 12, 13, 1, 2, 3, 4, 5, 6, 7,
-        8, 9, 10, 11, 12, 13, 1, 2, 3, 4, 5,
-        6, 7, 8, 9, 10, 11, 12, 13]
+  sum = 0
+  values.each do |value|
+    if value == "A"
+      sum += 11
+    elsif value.to_i == 0 # J, Q, K
+      sum += 10
+    else
+      sum += value.to_i
+    end
+  end
 
-CURRENT_DECK = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-                12, 13, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                10, 11, 12, 13, 1, 2, 3, 4, 5, 6, 7,
-                8, 9, 10, 11, 12, 13, 1, 2, 3, 4, 5,
-                6, 7, 8, 9, 10, 11, 12, 13]
+  # correct for Aces
+  values.select { |value| value == "A" }.count.times do
+    sum -= 10 if sum > 21
+  end
 
-PLAYER_HAND = []
-DEALER_HAND = []
-
-def prompt(txt)
-  puts txt
+  sum
 end
 
-def draw_a_card
-  drawn_card = CURRENT_DECK.sample
-  puts "THIS IS THE DRAWN CARD #{drawn_card}"
-  CURRENT_DECK.delete_at(CURRENT_DECK.index(drawn_card))
-  drawn_card
+def busted?(cards)
+  total(cards) > 21
 end
 
-def initialize_game
+def winner(dealer_cards, player_cards)
+  player_total = total(player_cards)
+  dealer_total = total(dealer_cards)
+  if (player_total > dealer_total && player_total < 22) || (player_total < 22 && dealer_total > 21)
+    "Player"
+  elsif (dealer_total > player_total && dealer_total < 22) || (dealer_total < 22 && player_total > 21)
+    "Dealer"
+  else
+    "Tie"
+  end
+end
+
+loop do
   system 'clear'
-  2.times { PLAYER_HAND << draw_a_card }
-  2.times { DEALER_HAND << draw_a_card }
-end
+  deck = DECK
 
-def player_turn
-  puts "Your hand is: #{PLAYER_HAND}"
-  puts "Your total is: #{PLAYER_HAND.sum}"
-  answer = ''
+  player_cards = []
+  dealer_cards = []
+
+  2.times do
+    card = deck.sample
+    player_cards.push(deck.delete(card))
+    card = deck.sample
+    dealer_cards.push(deck.delete(card))
+  end
+
+  puts "Dealer's first card is #{dealer_cards.first}"
 
   loop do
-    if PLAYER_HAND.sum >= 21 || answer == 's'
-      break
-    end
+    player_total = total(player_cards)
+    break if busted?(player_cards)
+    puts "Your cards are #{player_cards}"
+    puts "Your total is #{player_total}"
+    puts "(H)it or (s)tay?"
 
-    prompt "Would you like to (s)tay or (h)it?"
     answer = gets.chomp
-
-    if answer == 'h'
-      PLAYER_HAND << draw_a_card
+    if answer == 's'
+      break
+    else
+      card = deck.sample
+      player_cards.push(deck.delete(card))
     end
-
-    puts "Your hand is: #{PLAYER_HAND}"
-    puts "Your total is: #{PLAYER_HAND.sum}"
   end
-end
 
-def dealer_turn
-  if !(DEALER_HAND.sum >= 17)
-    DEALER_HAND << draw_a_card
+  loop do
+    dealer_total = total(dealer_cards)
+    break if dealer_total > 17
+    card = deck.sample
+    dealer_cards.push(deck.delete(card))
   end
-end
 
-def check_winner
-  PLAYER_HAND.sum > DEALER_HAND.sum && PLAYER_HAND.sum <= 21 ? 'Player' : 'Dealer'
-end
+  if busted?(player_cards)
+    puts "You're busted with #{total(player_cards)}!"
+  else
+    puts "You chose to stay!"
+  end
 
-initialize_game
-player_turn
-if PLAYER_HAND.sum <= 21
-  dealer_turn
+  winner = winner(dealer_cards, player_cards)
+  puts "#{winner} wins this round!"
+
+  puts "Do you want to play again?"
+  reply = gets.chomp
+  break if reply.downcase != 'yes'
 end
-puts check_winner
-puts "PLYAER: #{PLAYER_HAND.sum} and DEALER: #{DEALER_HAND.sum}"
